@@ -1,4 +1,3 @@
-// SendEmailForm component
 'use client';
 
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
@@ -29,31 +28,8 @@ export default function SendEmailForm() {
     e.preventDefault();
     if (!selectedTemplateId || !recipient) return;
     
-    // Process the body to preserve formatting for email clients
-    const processedBody = selectedTemplate.body
-      .split('\n') // Split by new lines
-      .map(line => {
-        // Process variables within each line
-        return line.split('{{').map((part, i) => {
-          const [field] = part.split('}}');
-          return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
-        }).join('');
-      })
-      .join('<br>'); // Join lines with HTML line breaks
-
-    const processedSubject = selectedTemplate.subject.split('{{').map((part, i) => {
-      const [field] = part.split('}}');
-      return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
-    }).join('');
-
     sendEmail(
-      { 
-        templateId: selectedTemplateId, 
-        recipient, 
-        variables,
-        processedBody, // Include the processed body with HTML line breaks
-        processedSubject
-      },
+      { templateId: selectedTemplateId, recipient, variables },
       { onSuccess: () => router.push('/sent') }
     );
   };
