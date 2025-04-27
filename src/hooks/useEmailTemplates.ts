@@ -35,3 +35,28 @@ export function useCreateEmailTemplate() {
     },
   });
 }
+
+export function useDeleteEmailTemplate() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (_id: string) => {
+      const response = await fetch('/api/templates', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ tempID: _id }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete template');
+      }
+
+      return response.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['emailTemplates'] }); // Refresh templates list
+    },
+  });
+}

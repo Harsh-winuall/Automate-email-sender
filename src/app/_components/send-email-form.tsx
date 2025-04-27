@@ -1,9 +1,11 @@
+// SendEmailForm component
 'use client';
 
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
 import { useSendEmail } from '@/hooks/useSendEmail';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { FiChevronDown, FiLoader } from 'react-icons/fi';
 
 export default function SendEmailForm() {
   const { data: templates, isLoading: templatesLoading } = useEmailTemplates();
@@ -27,89 +29,159 @@ export default function SendEmailForm() {
     e.preventDefault();
     if (!selectedTemplateId || !recipient) return;
     
+    // Process the body to preserve formatting for email clients
+    const processedBody = selectedTemplate.body
+      .split('\n') // Split by new lines
+      .map(line => {
+        // Process variables within each line
+        return line.split('{{').map((part, i) => {
+          const [field] = part.split('}}');
+          return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
+        }).join('');
+      })
+      .join('<br>'); // Join lines with HTML line breaks
+
+    const processedSubject = selectedTemplate.subject.split('{{').map((part, i) => {
+      const [field] = part.split('}}');
+      return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
+    }).join('');
+
     sendEmail(
-      { templateId: selectedTemplateId, recipient, variables },
+      { 
+        templateId: selectedTemplateId, 
+        recipient, 
+        variables,
+        processedBody, // Include the processed body with HTML line breaks
+        processedSubject
+      },
       { onSuccess: () => router.push('/sent') }
     );
   };
 
   if (templatesLoading) {
     return (
-      <div className="max-w-2xl mx-auto animate-pulse">
-        <div className="h-6 bg-gray-300 rounded mb-4" />
-        <div className="h-6 bg-gray-300 rounded mb-4" />
-        <div className="h-6 bg-gray-300 rounded mb-4" />
+      <div className="space-y-6 animate-pulse">
+        <div className="h-4 bg-gray-200 rounded w-1/3 mb-1"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
+        <div className="h-4 bg-gray-200 rounded w-1/3 mt-6 mb-1"></div>
+        <div className="h-10 bg-gray-200 rounded"></div>
       </div>
     );
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-8 shadow-md rounded-2xl max-w-2xl mx-auto space-y-6"
-    >
-      <div>
-        <label className="block text-sm font-semibold text-gray-700 mb-1">
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Template Selection */}
+      <div className="space-y-2">
+        <label className="block text-sm font-medium text-gray-700">
           Select Template
+          <span className="text-red-500 ml-1">*</span>
         </label>
-        <select
-          value={selectedTemplateId}
-          onChange={(e) => setSelectedTemplateId(e.target.value)}
-          className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-          required
-        >
-          <option value="">Select a template</option>
-          {templates?.map((template) => (
-            <option key={template._id} value={template._id}>
-              {template.name} ({template.category})
-            </option>
-          ))}
-        </select>
+        <div className="relative">
+          <select
+            value={selectedTemplateId}
+            onChange={(e) => setSelectedTemplateId(e.target.value)}
+            className="appearance-none block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+            required
+          >
+            <option value="">Select a template</option>
+            {templates?.map((template) => (
+              <option key={template._id} value={template._id}>
+                {template.name} ({template.category})
+              </option>
+            ))}
+          </select>
+          <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-500">
+            <FiChevronDown />
+          </div>
+        </div>
       </div>
 
       {selectedTemplate && (
         <>
-          <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-1">
+          {/* Recipient Email */}
+          <div className="space-y-2">
+            <label className="block text-sm font-medium text-gray-700">
               Recipient Email
+              <span className="text-red-500 ml-1">*</span>
             </label>
             <input
               type="email"
               value={recipient}
               onChange={(e) => setRecipient(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-              placeholder="example@example.com"
+              className="block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+              placeholder="recipient@example.com"
               required
             />
           </div>
 
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-2">
-              Fill Template Variables
-            </h3>
-            {selectedTemplate.fields.map((field) => (
-              <div key={field}>
-                <label className="block text-sm font-semibold text-gray-700 mb-1">
-                  {field}
-                </label>
-                <input
-                  type="text"
-                  value={variables[field] || ''}
-                  onChange={(e) => handleVariableChange(field, e.target.value)}
-                  className="w-full border border-gray-300 rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                  required
-                />
+          {/* Template Variables */}
+          <div className="space-y-6 pt-4">
+            <div className="border-t border-gray-200 pt-6">
+              <h3 className="text-lg font-medium text-gray-900 mb-4">
+                Personalize Your Message
+              </h3>
+              <div className="space-y-4">
+                {selectedTemplate.fields.map((field) => (
+                  <div key={field} className="space-y-2">
+                    <label className="block text-sm font-medium text-gray-700">
+                      {field}
+                      <span className="text-red-500 ml-1">*</span>
+                    </label>
+                    <input
+                      type="text"
+                      value={variables[field] || ''}
+                      onChange={(e) => handleVariableChange(field, e.target.value)}
+                      className="block w-full px-4 py-2.5 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 text-sm"
+                      required
+                    />
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
           </div>
 
-          <div className="flex justify-end">
+          {/* Preview Section */}
+          <div className="border border-gray-200 rounded-lg overflow-hidden">
+            <div className="bg-gray-50 px-4 py-3 border-b border-gray-200">
+              <h4 className="text-sm font-medium text-gray-700">Email Preview</h4>
+            </div>
+            <div className="p-4 bg-white">
+              <div className="text-sm font-medium text-gray-900 mb-2">
+                Subject: {selectedTemplate.subject.split('{{').map((part, i) => {
+                  const [field] = part.split('}}');
+                  return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
+                }).join('')}
+              </div>
+              <div className="text-sm text-gray-600 whitespace-pre-line border-t border-gray-200 pt-2 mt-2">
+                {selectedTemplate.body.split('{{').map((part, i) => {
+                  const [field] = part.split('}}');
+                  return i === 0 ? part : (variables[field] || `{{${field}}}`) + part.slice(field.length + 2);
+                }).join('')}
+              </div>
+            </div>
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end gap-3 pt-6">
+            <button
+              type="button"
+              onClick={() => router.push('/')}
+              className="px-4 py-2.5 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            >
+              Cancel
+            </button>
             <button
               type="submit"
               disabled={isPending}
-              className="inline-flex items-center gap-2 px-6 py-2.5 text-sm font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-6 py-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 disabled:opacity-70 disabled:cursor-not-allowed"
             >
-              {isPending ? 'Sending...' : 'Send Email'}
+              {isPending ? (
+                <>
+                  <FiLoader className="animate-spin mr-2" />
+                  Sending...
+                </>
+              ) : 'Send Email'}
             </button>
           </div>
         </>
