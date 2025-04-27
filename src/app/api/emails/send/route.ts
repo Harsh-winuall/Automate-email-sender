@@ -20,16 +20,20 @@ export async function POST(request: Request) {
 
   for (const [key, value] of Object.entries(variables)) {
     const placeholder = `{{${key}}}`;
-    subject = subject.replace(new RegExp(placeholder, 'g'), value);
-    body = body.replace(new RegExp(placeholder, 'g'), value);
+    const safeValue = value.replace(/\$/g, '$$$$'); // Escape $ if needed
+    subject = subject.replace(new RegExp(placeholder, 'g'), safeValue);
+    body = body.replace(new RegExp(placeholder, 'g'), safeValue);
   }
+
+  // Format body: replace newlines with <br> for HTML emails
+  const formattedBody = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">${body.replace(/\n/g, '<br>')}</div>`;
 
   // Send the email
   try {
     await sendEmail({
       to: recipient,
       subject,
-      html: body,
+      html: formattedBody,   // <-- send formatted body
     });
 
     // Save to sent emails
@@ -37,7 +41,7 @@ export async function POST(request: Request) {
       templateId: template._id,
       recipient,
       subject,
-      body,
+      body, // store raw text body (not HTML)
       category: template.category,
       variables,
     });
