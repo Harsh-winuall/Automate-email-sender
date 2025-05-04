@@ -15,6 +15,7 @@ import {
 import { useState } from "react";
 import { IEmailTemplate } from "@/models/EmailTemplate";
 import { ImBin } from "react-icons/im";
+import { toast } from "sonner";
 
 export default function TemplatesPage() {
   const { data: templates, isLoading, error } = useEmailTemplates();
@@ -198,7 +199,7 @@ export default function TemplatesPage() {
                       onClick={() => {
                         handleDelete(template._id);
                       }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition"
+                      className="inline-flex cursor-pointer items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition"
                     >
                       {deletingID === template._id ? (
                         "Deleting..."

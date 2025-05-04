@@ -1,6 +1,8 @@
 'use client'
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { toast } from 'sonner';
 
+// hooks/useSendEmail.ts
 export function useSendEmail() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -9,12 +11,18 @@ export function useSendEmail() {
       recipient: string;
       variables: Record<string, string>;
     }) => {
+      // Ensure variables is always an object
+      const payload = {
+        ...data,
+        variables: data.variables || {}
+      };
+
       const response = await fetch('/api/emails/send', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(data),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         throw new Error('Network response was not ok');
@@ -23,6 +31,10 @@ export function useSendEmail() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['sentEmails'] });
+      toast.success("Email sent successfully");
+    },
+    onError: (error) => {
+      toast.error("Error sending email: " + error.message);
     },
   });
 }

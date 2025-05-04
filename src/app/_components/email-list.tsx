@@ -2,6 +2,7 @@
 
 import { useSentEmails } from '@/hooks/useSentEmails';
 import Link from 'next/link';
+import { useEffect } from 'react';
 
 interface EmailListProps {
   category?: string;
@@ -9,6 +10,9 @@ interface EmailListProps {
 
 export default function EmailList({ category }: EmailListProps) {
   const { data: emails, isLoading, error } = useSentEmails(category);
+
+
+
 
   if (isLoading) return <div>Loading emails...</div>;
   if (error) return <div>Error loading emails: {error.message}</div>;
