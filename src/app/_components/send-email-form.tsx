@@ -2,20 +2,39 @@
 
 import { useEmailTemplates } from '@/hooks/useEmailTemplates';
 import { useSendEmail } from '@/hooks/useSendEmail';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { FiChevronDown, FiLoader } from 'react-icons/fi';
+import { toast } from 'sonner';
 
 export default function SendEmailForm() {
   const { data: templates, isLoading: templatesLoading } = useEmailTemplates();
   const [selectedTemplateId, setSelectedTemplateId] = useState('');
   const [recipient, setRecipient] = useState('');
-  const [variables, setVariables] = useState<Record<string, string>>({});
+  const selectedTemplate = templates?.find(t => t._id === selectedTemplateId);
+  const [variables, setVariables] = useState<Record<string, string>>(() => {
+    // Initialize with empty strings for all fields if template is selected
+    if (selectedTemplate) {
+      return selectedTemplate.fields.reduce((acc, field) => {
+        acc[field] = '';
+        return acc;
+      }, {} as Record<string, string>);
+    }
+    return {};
+  });
+
+  useEffect(() => {
+    if (selectedTemplate) {
+      setVariables(selectedTemplate.fields.reduce((acc, field) => {
+        acc[field] = variables[field] || '';
+        return acc;
+      }, {} as Record<string, string>));
+    }
+  }, [selectedTemplateId]);
   
   const { mutate: sendEmail, isPending } = useSendEmail();
   const router = useRouter();
-
-  const selectedTemplate = templates?.find(t => t._id === selectedTemplateId);
+  
 
   const handleVariableChange = (field: string, value: string) => {
     setVariables(prev => ({
@@ -26,13 +45,31 @@ export default function SendEmailForm() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedTemplateId || !recipient) return;
     
-    sendEmail(
-      { templateId: selectedTemplateId, recipient, variables },
-      { onSuccess: () => router.push('/sent') }
+    if (!selectedTemplateId || !recipient) {
+      toast.error('Please select a template and enter recipient email');
+      return;
+    }
+  
+    // Check all required fields are filled
+    const missingFields = selectedTemplate.fields.filter(
+      field => !variables[field]?.trim()
     );
+  
+    if (missingFields.length > 0) {
+      toast.error(`Please fill in: ${missingFields.join(', ')}`);
+      return;
+    }
+  
+    sendEmail({
+      templateId: selectedTemplateId,
+      recipient,
+      variables,
+    }, {
+      onSuccess: () => router.push('/sent')
+    });
   };
+  
 
   if (templatesLoading) {
     return (
@@ -44,6 +81,8 @@ export default function SendEmailForm() {
       </div>
     );
   }
+
+
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

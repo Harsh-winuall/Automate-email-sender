@@ -16,3 +16,17 @@ export function useSentEmails(category?: string) {
     },
   });
 }
+
+export function useEmail(id: string) {
+  return useQuery({
+    queryKey: ['email', id],
+    queryFn: async () => {
+      const response = await fetch(`/api/emails/${id}`);
+      if (!response.ok) {
+        throw new Error('Network response was not ok');
+      }
+      return response.json();
+    },
+    enabled: !!id,
+  });
+}
