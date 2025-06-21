@@ -1,15 +1,17 @@
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import "./globals.css";
+import { Toaster } from "sonner";
+import { QueryProvider } from "./providers/QueryProvider";
 
-import type { Metadata } from 'next';
-import { Inter } from 'next/font/google';
-import './globals.css';
-import { QueryProvider } from './providers/QueryProvider';
-import { Toaster } from 'sonner';
-
-const inter = Inter({ subsets: ['latin'] });
+const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: 'Email Automation',
-  description: 'Send templated emails easily',
+  title: "MailFlow | Email Sender",
+  description: "Create, send, and schedule emails with customizable templates",
+  icons: {
+    icon: "./favicon.png",
+  }
 };
 
 export default function RootLayout({
@@ -20,8 +22,12 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={inter.className}>
-        <QueryProvider>{children}</QueryProvider>
-        <Toaster/>
+        <QueryProvider>
+          <div>
+            {children}
+          </div>
+        </QueryProvider>
+        <Toaster />
       </body>
     </html>
   );

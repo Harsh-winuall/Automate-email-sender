@@ -24,3 +24,77 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Overlay to cover the entire screen */
+.page-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgb(255, 255, 255); /* Semi-transparent white background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999; /* Ensure it's on top of everything */
+}
+
+/* Content wrapper for centering */
+.page-loader-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px; /* Space between icon and text */
+}
+
+/* Email Flow Icon - GrSend */
+.email-flow-icon {
+  font-size: 4rem; /* Adjust size as needed */
+  color: #007bff; /* A typical email blue, adjust to your theme */
+  animation: emailFlow 2s linear infinite; /* Apply the animation */
+}
+
+/* Text below the icon */
+.page-loader-content p {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+/* Keyframe Animation for Email Flow */
+@keyframes emailFlow {
+  0% {
+    transform: translateX(-100px) rotate(0deg); /* Start off-screen left */
+    opacity: 0;
+  }
+  25% {
+    transform: translateX(0px) rotate(15deg); /* Move to center, slight rotation */
+    opacity: 1;
+  }
+  50% {
+    transform: translateX(100px) rotate(0deg); /* Move to right, back to original rotation */
+    opacity: 1;
+  }
+  75% {
+    transform: translateX(200px) rotate(-15deg); /* Move further right, opposite rotation */
+    opacity: 0.5;
+  }
+  100% {
+    transform: translateX(300px) rotate(0deg); /* Off-screen right, faded out */
+    opacity: 0;
+  }
+}
+
+/* You can add more complex animations: */
+/* Example: Pulsing effect */
+/* @keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+.email-flow-icon {
+  animation: emailFlow 2s ease-in-out infinite, pulse 1.5s infinite;
+}
+*/
+
+
+
