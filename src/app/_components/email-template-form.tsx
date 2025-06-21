@@ -9,6 +9,8 @@ import {
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { FiPlus, FiX, FiHelpCircle, FiLink } from "react-icons/fi";
+import RichTextEditor from "./rich-text-editor";
+import PageLoader from "./page-loader";
 
 export default function EmailTemplateForm({ id }: { id?: string }) {
   const [name, setName] = useState("");
@@ -27,11 +29,10 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
   // Router
   const router = useRouter();
   const { mutate: updateTemplate, isPending: isUpdating } = useUpdateTemplate();
-
-  if (id) {
-    const { data: existingTemplate } = useTemplate(id);
-
-    useEffect(() => {
+  const { data: existingTemplate, isLoading } = id ? useTemplate(id) : { data: null, isLoading: false };
+  const { mutate: createTemplate, isPending } = useCreateEmailTemplate();
+  
+  useEffect(() => {
       if (existingTemplate) {
         setName(existingTemplate?.name);
         setCategory(existingTemplate?.category);
@@ -39,10 +40,12 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
         setBody(existingTemplate?.body);
         setFields(existingTemplate?.fields);
       }
-    }, [existingTemplate]);
+    }, [id, existingTemplate]);
+  
+  if(isLoading){
+    return <PageLoader isLoading/>
   }
 
-  const { mutate: createTemplate, isPending } = useCreateEmailTemplate();
 
   const handleAddField = () => {
     if (newField && !fields.includes(newField)) {
@@ -158,35 +161,13 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
 
       {/* Body */}
       <div className="space-y-2">
-        <div className="flex items-center justify-between">
-          <label className="block text-sm font-medium text-gray-700">
-            Email Body
-            <span className="text-red-500 ml-1">*</span>
-          </label>
-          <div className="flex items-center">
-            <button
-              type="button"
-              onClick={() => setShowLinkDialog(true)}
-              className="flex font-semibold bg-indigo-50 py-1 px-2 cursor-pointer rounded-md items-center text-xs text-indigo-600 hover:text-indigo-800 mr-2"
-            >
-              <FiLink className="mr-1" />
-              Insert Link
-            </button>
-            <div className="flex items-center text-xs text-gray-500">
-              <FiHelpCircle className="mr-1" />
-              Use {"{{fieldName}}"} for placeholders
-            </div>
-          </div>
-        </div>
-        <textarea
-          ref={textareaRef}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          rows={10}
-          className="block p-3 w-full rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 text-sm font-mono"
-          placeholder={`Dear Hiring Manager,\n\nI'm excited to apply for the {{position}} role at {{company}}...`}
-          required
-        />
+        <label className="block text-sm font-medium text-gray-700">
+          Email Body <span className="text-red-500 ml-1">*</span>
+        </label>
+        <RichTextEditor content={body} onChange={setBody} />
+        <p className="text-xs text-gray-500">
+        Use <code>{"{{fieldName}}"}</code> for placeholders
+        </p>
       </div>
 
       {/* Link Insertion Dialog */}

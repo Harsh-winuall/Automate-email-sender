@@ -1,7 +1,7 @@
 // app/send/page.tsx
 import { FiArrowLeft, FiSend } from 'react-icons/fi';
 import Link from 'next/link';
-import SendEmailForm from "../_components/send-email-form";
+import SendEmailForm from "../../_components/send-email-form";
 
 export default function SendEmailPage() {
   return (

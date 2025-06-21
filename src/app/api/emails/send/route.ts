@@ -3,6 +3,7 @@ import { EmailTemplate } from '@/models/EmailTemplate';
 import { SentEmail } from '@/models/SentEmail';
 import { sendEmail } from '@/lib/email';
 import dbConnect from '@/lib/db';
+import mongoose from 'mongoose';
 
 export async function POST(request: Request) {
   await dbConnect();
@@ -28,6 +29,16 @@ export async function POST(request: Request) {
     }
   }
 
+  // Create unique email ID for tracking
+  const emailId = new mongoose.Types.ObjectId().toString();
+  console.log('Generated email ID:', emailId);
+  const baseUrl = 'http://localhost:3000';
+  // const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || '/';
+
+   // Add tracking pixel
+   body += `<img src="${baseUrl}/api/track/open?id=${emailId}" width="1" height="1" />`;
+
+
   // Format body
   const formattedBody = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">${body.replace(/\n/g, '<br>')}</div>`;
 
@@ -39,6 +50,7 @@ export async function POST(request: Request) {
     });
 
     const sentEmail = await SentEmail.create({
+      _id: emailId,
       templateId: template._id,
       recipient,
       subject,
