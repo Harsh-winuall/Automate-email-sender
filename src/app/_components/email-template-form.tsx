@@ -17,6 +17,7 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
   const [category, setCategory] = useState<
     "job-application" | "referral-request" | "other"
   >("job-application");
+  const [generating, setGenerating] = useState(false);
   const [subject, setSubject] = useState("");
   const [body, setBody] = useState("");
   const [fields, setFields] = useState<string[]>([]);
@@ -29,23 +30,24 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
   // Router
   const router = useRouter();
   const { mutate: updateTemplate, isPending: isUpdating } = useUpdateTemplate();
-  const { data: existingTemplate, isLoading } = id ? useTemplate(id) : { data: null, isLoading: false };
+  const { data: existingTemplate, isLoading } = id
+    ? useTemplate(id)
+    : { data: null, isLoading: false };
   const { mutate: createTemplate, isPending } = useCreateEmailTemplate();
-  
-  useEffect(() => {
-      if (existingTemplate) {
-        setName(existingTemplate?.name);
-        setCategory(existingTemplate?.category);
-        setSubject(existingTemplate.subject);
-        setBody(existingTemplate?.body);
-        setFields(existingTemplate?.fields);
-      }
-    }, [id, existingTemplate]);
-  
-  if(isLoading){
-    return <PageLoader isLoading/>
-  }
 
+  useEffect(() => {
+    if (existingTemplate) {
+      setName(existingTemplate?.name);
+      setCategory(existingTemplate?.category);
+      setSubject(existingTemplate.subject);
+      setBody(existingTemplate?.body);
+      setFields(existingTemplate?.fields);
+    }
+  }, [id, existingTemplate]);
+
+  if (isLoading) {
+    return <PageLoader isLoading />;
+  }
 
   const handleAddField = () => {
     if (newField && !fields.includes(newField)) {
@@ -60,31 +62,32 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
 
   const handleInsertLink = () => {
     if (!linkUrl || !linkText) return;
-    
+
     const linkHtml = `<a href="${linkUrl}" target="_blank" rel="noopener noreferrer">${linkText}</a>`;
-    
+
     if (textareaRef.current) {
       const textarea = textareaRef.current;
       const startPos = textarea.selectionStart;
       const endPos = textarea.selectionEnd;
-      
+
       // Insert the link at cursor position or replace selected text
-      const newBody = 
-        body.substring(0, startPos) + 
-        linkHtml + 
-        body.substring(endPos);
-      
+      const newBody =
+        body.substring(0, startPos) + linkHtml + body.substring(endPos);
+
       setBody(newBody);
-      
+
       // Close dialog and reset fields
       setShowLinkDialog(false);
       setLinkUrl("");
       setLinkText("");
-      
+
       // Focus back on textarea after insertion
       setTimeout(() => {
         textarea.focus();
-        textarea.setSelectionRange(startPos + linkHtml.length, startPos + linkHtml.length);
+        textarea.setSelectionRange(
+          startPos + linkHtml.length,
+          startPos + linkHtml.length
+        );
       }, 0);
     }
   };
@@ -103,6 +106,39 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
       createTemplate(templateData, {
         onSuccess: () => router.push("/templates"),
       });
+    }
+  };
+
+  const generateWithAI = async () => {
+    setGenerating(true);
+    try {
+      const res = await fetch("/api/generate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          category: category,
+          goal:
+            name ||
+            `The template is named "${name}" and should be suitable for ${category}`,
+        }),
+      });
+
+      const data = await res.json();
+      console.log(data);
+
+      if (res.ok) {
+        setSubject(data.subject);
+        setBody(data.body);
+        setFields(data.variables);
+      } else {
+        alert("Error generating email: " + data.error);
+      }
+    } catch (err) {
+      alert("Failed to generate email with AI");
+      console.error(err);
+    }
+    finally {
+      setGenerating(false);
     }
   };
 
@@ -143,6 +179,17 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
         </div>
       </div>
 
+      {/* Generate with AI Button */}
+      <div className="flex justify-end mb-2">
+        <button
+          type="button"
+          onClick={generateWithAI}
+          className="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gradient-to-br bg-indigo-600 hover:bg-indigo-700 rounded-lg shadow-sm transition"
+        >
+          ✨ {generating ? "Generating..." : "Generate with AI"}
+        </button>
+      </div>
+
       {/* Subject */}
       <div className="space-y-2">
         <label className="block text-sm font-medium text-gray-700">
@@ -166,7 +213,7 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
         </label>
         <RichTextEditor content={body} onChange={setBody} />
         <p className="text-xs text-gray-500">
-        Use <code>{"{{fieldName}}"}</code> for placeholders
+          Use <code>{"{{fieldName}}"}</code> for placeholders
         </p>
       </div>
 
@@ -176,7 +223,7 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
           <div className="bg-white rounded-lg p-6 w-full max-w-md">
             <div className="flex justify-between items-center mb-4">
               <h3 className="text-lg font-medium">Insert Link</h3>
-              <button 
+              <button
                 onClick={() => setShowLinkDialog(false)}
                 className="text-gray-500 hover:text-gray-700"
               >
@@ -229,7 +276,6 @@ export default function EmailTemplateForm({ id }: { id?: string }) {
           </div>
         </div>
       )}
-
 
       {/* Fields */}
       <div className="space-y-2">
