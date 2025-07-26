@@ -4,8 +4,17 @@ import { SentEmail } from '@/models/SentEmail';
 import { sendEmail } from '@/lib/email';
 import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '../../auth/[...nextauth]/route';
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const userId = new mongoose.Types.ObjectId(session.user.id);
   await dbConnect();
   const { templateId, recipient, variables = {} } = await request.json();
 
@@ -57,6 +66,7 @@ export async function POST(request: Request) {
       body,
       category: template.category,
       variables,
+      userId,
     });
 
     return NextResponse.json(sentEmail);

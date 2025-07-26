@@ -1,4 +1,4 @@
-import { Schema, model, models } from 'mongoose';
+import mongoose, { Schema, model, models } from 'mongoose';
 
 export interface IEmailTemplate {
   _id: string;
@@ -9,6 +9,7 @@ export interface IEmailTemplate {
   fields: string[];
   createdAt: Date;
   updatedAt: Date;
+  userId: mongoose.Schema.Types.ObjectId; 
 }
 
 const emailTemplateSchema = new Schema<IEmailTemplate>(
@@ -21,7 +22,8 @@ const emailTemplateSchema = new Schema<IEmailTemplate>(
     },
     subject: { type: String, required: true },
     body: { type: String, required: true },
-    fields: { type: [String], required: true }
+    fields: { type: [String], required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: true }
 );

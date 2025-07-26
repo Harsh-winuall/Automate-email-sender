@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { Schema, model, models } from 'mongoose';
 
 export interface ISentEmail {
@@ -9,6 +10,7 @@ export interface ISentEmail {
   category: 'job-application' | 'referral-request' | 'other';
   variables: Record<string, string>;
   sentAt: Date;
+  userId: mongoose.Schema.Types.ObjectId; // Reference to User model
 }
 
 const sentEmailSchema = new Schema<ISentEmail>(
@@ -23,6 +25,7 @@ const sentEmailSchema = new Schema<ISentEmail>(
       enum: ['job-application', 'referral-request', 'other'] 
     },
     variables: { type: Schema.Types.Mixed, required: true },
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   },
   { timestamps: { createdAt: 'sentAt', updatedAt: false } }
 );
