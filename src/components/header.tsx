@@ -11,6 +11,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
+import { signOut } from "next-auth/react";
 
 const Header = () => {
   return (
@@ -39,7 +40,7 @@ const Header = () => {
               <Avatar name="Harsh Tripathi" size="sm" />
             </DropdownMenuTrigger>
             <DropdownMenuContent>
-              <DropdownMenuItem onClick={() => console.log("Edit clicked")}>
+              {/* <DropdownMenuItem onClick={() => console.log("Edit clicked")}>
                 Edit
               </DropdownMenuItem>
               <DropdownMenuItem
@@ -52,12 +53,12 @@ const Header = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => console.log("Move clicked")}>
                 Move
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
-                onClick={() => console.log("Delete clicked")}
+                onClick={async () => await signOut({ callbackUrl: "/" })}
                 className="text-red-600 hover:bg-red-50 hover:text-red-700"
               >
-                Delete
+                Log Out
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

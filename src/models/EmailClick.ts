@@ -5,6 +5,7 @@ const EmailClickSchema = new mongoose.Schema({
   emailId: { type: String, required: true },
   clickedAt: { type: Date, default: Date.now },
   clickedUrl: { type: String, required: true },
+  userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
   ip: String,
 });
 

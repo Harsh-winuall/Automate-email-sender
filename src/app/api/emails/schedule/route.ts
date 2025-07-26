@@ -2,8 +2,16 @@
 import { NextResponse } from "next/server";
 import { getAgendaInstance } from "@/lib/agenda";
 import dbConnect from "@/lib/db";
+import { getServerSession } from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/route";
 
 export async function POST(request: Request) {
+  const session = await getServerSession(authOptions);
+
+  if (!session || !session.user) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
   await dbConnect();
   const agenda = await getAgendaInstance();
 
