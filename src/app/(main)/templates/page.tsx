@@ -64,7 +64,7 @@ export default function TemplatesPage() {
 
   return (
     <>
-      <div className="min-h-screen py-8 px-4 sm:px-6">
+      <div className="h-full py-8 px-4 sm:px-6">
         <div className="max-w-7xl mx-auto">
           {/* Header Section */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-6 mb-8">

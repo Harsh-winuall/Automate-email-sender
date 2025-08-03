@@ -1,21 +1,30 @@
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
+import { nameFromEmail } from "./encryption";
 
 interface SendEmailParams {
   to: string;
   subject: string;
   html: string;
+  appPassword?: string; // Optional app password for Gmail
+  from?: string; // Optional sender email
 }
 
-export async function sendEmail({ to, subject, html }: SendEmailParams) {
+export async function sendEmail({
+  to,
+  subject,
+  html,
+  appPassword,
+  from,
+}: SendEmailParams) {
   // For production, use a real email service like SendGrid
   let transporter = nodemailer.createTransport({
-    service:"gmail",
+    service: "gmail",
     // host: process.env.EMAIL_HOST,
     // port: Number(process.env.EMAIL_PORT),
     // secure: process.env.EMAIL_SECURE === 'true',
     auth: {
-      user: process.env.EMAIL_FROM,
-      pass: process.env.EMAIL_PASSWORD,
+      user: from,
+      pass: appPassword,
     },
   });
 
@@ -33,15 +42,17 @@ export async function sendEmail({ to, subject, html }: SendEmailParams) {
   //   });
   // }
 
+  const name = nameFromEmail(from || "no-reply@example.com");
+
   const info = await transporter.sendMail({
-    from: `"Harsh" <${process.env.EMAIL_FROM || 'no-reply@example.com'}>`,
+    from: `"${name}" <${from || "no-reply@example.com"}>`,
     to,
     subject,
     html,
   });
 
-  if (process.env.NODE_ENV === 'development') {
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
+  if (process.env.NODE_ENV === "development") {
+    console.log("Preview URL: %s", nodemailer.getTestMessageUrl(info));
   }
 
   return info;

@@ -12,8 +12,13 @@ export default function SendEmailForm() {
   const { data: templates, isLoading: templatesLoading } = useEmailTemplates();
   const [selectedTemplateId, setSelectedTemplateId] = useState("");
   const [recipient, setRecipient] = useState("");
-  const [sendAt, setSendAt] = useState('');
+  const [sendAt, setSendAt] = useState("");
   const selectedTemplate = templates?.find((t) => t._id === selectedTemplateId);
+  const [sendFollowUp, setSendFollowUp] = useState(false);
+
+  const handleCheckboxChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSendFollowUp(event.target.checked);
+  };
   const [variables, setVariables] = useState<Record<string, string>>(() => {
     // Initialize with empty strings for all fields if template is selected
     if (selectedTemplate) {
@@ -37,7 +42,8 @@ export default function SendEmailForm() {
   }, [selectedTemplateId]);
 
   const { mutate: sendEmail, isPending: sendEmailPending } = useSendEmail();
-  const { mutate: scheduleEmail, isPending: scheduleEmailPending } = useScheduleEmail();
+  const { mutate: scheduleEmail, isPending: scheduleEmailPending } =
+    useScheduleEmail();
 
   const router = useRouter();
 
@@ -66,7 +72,7 @@ export default function SendEmailForm() {
       return;
     }
 
-    if(sendAt) {
+    if (sendAt) {
       // Schedule the email
       scheduleEmail(
         {
@@ -80,26 +86,24 @@ export default function SendEmailForm() {
         },
         {
           onSuccess: () => {
-            router.push('/scheduled-emails');
+            router.push("/scheduled-emails");
           },
         }
       );
       return;
-    }
-    else{
+    } else {
       sendEmail(
         {
           templateId: selectedTemplateId,
           recipient,
           variables,
+          sendFollowUp,
         },
         {
           onSuccess: () => router.push("/sent"),
         }
       );
     }
-
-
   };
 
   if (templatesLoading) {
@@ -234,6 +238,16 @@ export default function SendEmailForm() {
                   .join("")}
               </div>
             </div>
+          </div>
+
+          <div className="flex items-center group gap-2">
+            <input
+              type="checkbox"
+              name="sendFollowUp"
+              checked={sendFollowUp}
+              onChange={handleCheckboxChange}
+            />
+            <span>Would you like to send a Follow-up?</span>
           </div>
 
           {/* Form Actions */}

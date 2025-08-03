@@ -1,5 +1,5 @@
-import mongoose from 'mongoose';
-import { Schema, model, models } from 'mongoose';
+import mongoose from "mongoose";
+import { Schema, model, models } from "mongoose";
 
 export interface ISentEmail {
   _id: string;
@@ -7,10 +7,13 @@ export interface ISentEmail {
   recipient: string;
   subject: string;
   body: string;
-  category: 'job-application' | 'referral-request' | 'other';
+  category: "job-application" | "referral-request" | "other";
   variables: Record<string, string>;
+  isOpened: Boolean;
+  followUpSent: Boolean;
   sentAt: Date;
   userId: mongoose.Schema.Types.ObjectId; // Reference to User model
+  sendFollowUp: boolean
 }
 
 const sentEmailSchema = new Schema<ISentEmail>(
@@ -19,15 +22,23 @@ const sentEmailSchema = new Schema<ISentEmail>(
     recipient: { type: String, required: true },
     subject: { type: String, required: true },
     body: { type: String, required: true },
-    category: { 
-      type: String, 
+    isOpened: { type: Boolean, default: false },
+    followUpSent: { type: Boolean, default: false },
+    sendFollowUp : { type: Boolean, default: false },
+    category: {
+      type: String,
       required: true,
-      enum: ['job-application', 'referral-request', 'other'] 
+      enum: ["job-application", "referral-request", "other"],
     },
     variables: { type: Schema.Types.Mixed, required: true },
-    userId: { type: mongoose.Schema.Types.ObjectId, ref: "User", required: true },
+    userId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
   },
-  { timestamps: { createdAt: 'sentAt', updatedAt: false } }
+  { timestamps: { createdAt: "sentAt", updatedAt: false } }
 );
 
-export const SentEmail = models.SentEmail || model<ISentEmail>('SentEmail', sentEmailSchema);
+export const SentEmail =
+  models.SentEmail || model<ISentEmail>("SentEmail", sentEmailSchema);

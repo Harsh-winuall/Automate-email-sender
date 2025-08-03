@@ -10,6 +10,7 @@ export function useSendEmail() {
       templateId: string;
       recipient: string;
       variables: Record<string, string>;
+      sendFollowUp: boolean;
     }) => {
       // Ensure variables is always an object
       const payload = {

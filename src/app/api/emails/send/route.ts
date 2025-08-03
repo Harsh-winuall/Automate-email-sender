@@ -6,6 +6,8 @@ import dbConnect from '@/lib/db';
 import mongoose from 'mongoose';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '../../auth/[...nextauth]/route';
+import { EmailCredential } from '@/models/EmailCredential';
+import { decrypt } from '@/lib/encryption';
 
 export async function POST(request: Request) {
   const session = await getServerSession(authOptions);
@@ -16,7 +18,7 @@ export async function POST(request: Request) {
 
   const userId = new mongoose.Types.ObjectId(session.user.id);
   await dbConnect();
-  const { templateId, recipient, variables = {} } = await request.json();
+  const { templateId, sendFollowUp, recipient, variables = {} } = await request.json();
 
   // Get the template
   const template = await EmailTemplate.findById(templateId);
@@ -51,11 +53,23 @@ export async function POST(request: Request) {
   // Format body
   const formattedBody = `<div style="font-family: Arial, sans-serif; font-size: 14px; color: #333;">${body.replace(/\n/g, '<br>')}</div>`;
 
+  const creds = await EmailCredential.findOne({
+    userId: new mongoose.Types.ObjectId(userId),
+  });
+
+  if (!creds) {
+    throw new Error("Email credentials not set for this user.");
+  }
+
+  const decryptedPassword = decrypt(creds.encryptedPassword);
+
   try {
     await sendEmail({
       to: recipient,
       subject,
       html: formattedBody,
+      appPassword: decryptedPassword, // Use decrypted password
+      from: creds.email, // Use the email from credentials
     });
 
     const sentEmail = await SentEmail.create({
@@ -67,6 +81,7 @@ export async function POST(request: Request) {
       category: template.category,
       variables,
       userId,
+      sendFollowUp
     });
 
     return NextResponse.json(sentEmail);

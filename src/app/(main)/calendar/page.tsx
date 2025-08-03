@@ -44,21 +44,21 @@ export default function EmailScheduler() {
   };
 
   // Handle form submission
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    const emailToSchedule = {
-      ...newEmail,
-      id: Date.now(),
-      scheduledAt: newEmail.scheduledTime,
-    };
-    setScheduledEmails([...scheduledEmails, emailToSchedule]);
-    setNewEmail({
-      subject: "",
-      recipient: "",
-      body: "",
-      scheduledTime: format(selectedDate, "yyyy-MM-dd'T'HH:mm"),
-    });
-  };
+  // const handleSubmit = (e) => {
+  //   e.preventDefault();
+  //   const emailToSchedule = {
+  //     ...newEmail,
+  //     id: Date.now(),
+  //     scheduledAt: newEmail.scheduledTime,
+  //   };
+  //   setScheduledEmails([...scheduledEmails, emailToSchedule]);
+  //   setNewEmail({
+  //     subject: "",
+  //     recipient: "",
+  //     body: "",
+  //     scheduledTime: format(selectedDate, "yyyy-MM-dd'T'HH:mm"),
+  //   });
+  // };
 
   // Filter emails for selected date
   const emailsForSelectedDate = scheduledEmails.filter((email) =>
@@ -67,7 +67,7 @@ export default function EmailScheduler() {
 
   return (
     <>
-      <div className="min-h-screen ">
+      <div className="h-full ">
         <div className="max-w-6xl mx-auto">
           <h1 className="text-xl font-bold text-gray-800 mb-8">
              Schedule Emails
@@ -278,6 +278,8 @@ export default function EmailScheduler() {
               </div>
             </div>
           </div>
+
+          
         </div>
       </div>
     </>

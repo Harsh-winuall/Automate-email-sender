@@ -1,9 +1,11 @@
 // lib/agenda.ts
+
 import { Agenda } from 'agenda';
 import dbConnect from './db';
 import { sendEmail } from './email';
 import { EmailTemplate } from '@/models/EmailTemplate';
 import { SentEmail } from '@/models/SentEmail';
+import { sendFollowUp } from './agendaJobs/sendFollowUp';
 
 let agenda: Agenda | null = null;
 
@@ -16,7 +18,7 @@ export async function getAgendaInstance() {
     db: { address: process.env.MONGODB_URI as string, collection: 'agendaJobs' },
   });
 
-  // Define job: send scheduled email
+  //  Scheduled Email Job
   agenda.define('send scheduled email', async (job: any) => {
     const { templateId, recipient, variables = {} } = job.attrs.data;
 
@@ -49,7 +51,12 @@ export async function getAgendaInstance() {
     console.log(`Scheduled email sent to ${recipient}`);
   });
 
+  // Follow-up Email Job
+  agenda.define('send-unopened-followups', sendFollowUp);
+
   await agenda.start();
+  await agenda.every('48 hours', 'send-unopened-followups');
+
   console.log('✅ Agenda started');
   return agenda;
 }
