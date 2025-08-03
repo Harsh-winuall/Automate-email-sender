@@ -43,6 +43,9 @@ export default function EmailScheduler() {
     }));
   };
 
+
+  console.log(newEmail && ".")
+
   // Handle form submission
   // const handleSubmit = (e) => {
   //   e.preventDefault();

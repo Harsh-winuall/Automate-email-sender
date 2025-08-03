@@ -43,7 +43,7 @@ export default function EmailSetupDocs() {
 
         <li id="step-2">
           <p>
-            Enable <strong>2-Step Verification</strong> if it's not already
+            Enable <strong>2-Step Verification</strong> if it&apos;s not already
             enabled.
           </p>
           <Image

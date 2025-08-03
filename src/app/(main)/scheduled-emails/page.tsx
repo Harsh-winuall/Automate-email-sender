@@ -39,7 +39,7 @@ export default function ScheduledEmailList() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data?.scheduledEmails?.map((job: any) => {
+          {data?.scheduledEmails?.map((job: { id: any; recipient: any; subject: any; templateId: any; nextRunAt: any; category: any; }) => {
             const { id, recipient, subject, templateId, nextRunAt, category } = job;
 
             return (

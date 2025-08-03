@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+// import { Inter } from "next/font/google";
 import "../globals.css";
-import { Toaster } from "sonner";
 import { Sidebar } from "@/components/sidebar";
 import Header from "@/components/header";
-import { QueryProvider } from "../providers/QueryProvider";
-import LandingPage from "../_components/landing-page";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../api/auth/[...nextauth]/route";
 import { redirect } from "next/navigation";
 
-const inter = Inter({ subsets: ["latin"] });
+// const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
   title: "MailFlow | Email Sender Dashboard",

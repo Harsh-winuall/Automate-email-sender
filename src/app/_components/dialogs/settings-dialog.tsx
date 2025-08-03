@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import {
   Dialog,
-  DialogClose,
   DialogContent,
   DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from "@/components/dialog";
@@ -21,7 +19,7 @@ const SettingsDialog: React.FC<Props> = ({ open, onOpenChange }) => {
   const renderRightPanel = (onOpenChange:any) => {
     switch (selectedOption) {
       case "connect-email":
-        return <ConnectEmail onOpenChange/>;
+        return <ConnectEmail onOpenChange={onOpenChange}/>;
       case "account":
         return <div>Account Settings Component</div>;
       case "security":

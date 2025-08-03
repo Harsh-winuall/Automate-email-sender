@@ -15,7 +15,6 @@ import {
 import { useState } from "react";
 import { IEmailTemplate } from "@/models/EmailTemplate";
 import { ImBin } from "react-icons/im";
-import { toast } from "sonner";
 import PageLoader from "../../_components/page-loader";
 
 export default function TemplatesPage() {

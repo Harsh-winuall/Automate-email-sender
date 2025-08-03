@@ -5,13 +5,13 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
 
-export default function ConnectEmail(onOpenChange: () => void ) {
+export default function ConnectEmail({onOpenChange}:{onOpenChange: () => void} ) {
   const [appPassword, setAppPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState("");
 
   const appPasswordMutation = useSaveAppPassword();
-  const { data, isLoading } = useGetAppPassword();
+  const { data } = useGetAppPassword();
 
   useEffect(() => {
     if (data?.appPassword) {

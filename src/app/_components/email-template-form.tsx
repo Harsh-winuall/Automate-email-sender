@@ -8,7 +8,7 @@ import {
 } from "@/hooks/useEmailTemplates";
 import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { FiPlus, FiX, FiHelpCircle, FiLink } from "react-icons/fi";
+import { FiPlus, FiX } from "react-icons/fi";
 import RichTextEditor from "./rich-text-editor";
 import PageLoader from "./page-loader";
 

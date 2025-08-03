@@ -2,15 +2,15 @@ import Link from 'next/link';
 import EmailList from '../../_components/email-list';
 
 interface SentEmailsPageProps {
-  searchParams: {
+  searchParams?: Promise<{
     category?: 'job-application' | 'referral-request' | string;
-  };
+  }>;
 }
 
 export default async function SentEmailsPage({ searchParams }: SentEmailsPageProps) {
   // Destructure category from searchParams.
   // Note: In Next.js App Router, searchParams are plain objects, no need for `await`.
-  const {category} = await searchParams;
+  const {category} = await searchParams || {};
 
   return (
     <>
