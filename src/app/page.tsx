@@ -1,14 +1,19 @@
-'use client'
+
 import { redirect } from 'next/navigation';
-import React, { useState } from 'react'
+import React from 'react'
 import LandingPage from './_components/landing-page';
+import { getServerSession } from 'next-auth';
+import { authOptions } from './api/auth/[...nextauth]/route';
 
-const HomePage = () => {
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+const HomePage = async () => {
+  const session = await getServerSession(authOptions);
 
-  if(isLoggedIn) {
+  // console.log(session)
+
+  if(session?.user){
     redirect('/dashboard');
   }
+  
   return (
     <div>
       <LandingPage/>

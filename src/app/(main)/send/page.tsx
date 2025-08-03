@@ -5,7 +5,7 @@ import SendEmailForm from "../../_components/send-email-form";
 
 export default function SendEmailPage() {
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6">
+    <div className="h-full bg-gradient-to-b from-gray-50 to-white py-8 px-4 sm:px-6">
       <div className="max-w-4xl mx-auto">
         <div className="mb-6">
           <Link 

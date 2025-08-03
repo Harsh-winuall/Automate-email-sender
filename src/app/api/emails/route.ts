@@ -25,5 +25,6 @@ export async function GET(request: Request) {
   }
 
   const emails = await SentEmail.find(query).sort({ sentAt: -1 });
+  console.log(emails)
   return NextResponse.json(emails);
 }
